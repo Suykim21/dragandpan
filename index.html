@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Drag Element</title>
+    <style>
+      .parentElem {
+        transform-origin: 0 0;
+        position: relative;
+        height: 100%;
+        width: 100%;
+      }
+
+      .elem {
+        transform-origin: 0 0;
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        height: 100px;
+        width: 100px;
+        border: 5px solid red;
+        background-color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="parentElem">
+      <div class="elem"></div>
+    </div>
+    <script>
+      const dragElem = document.querySelector(".elem");
+
+      // let initialX, initialY, currentX, currentY, activeStatus;
+      let dragState;
+      let offsetX;
+      let offsetY;
+
+      dragElem.addEventListener("mousedown", e => {
+        if (e.buttons === 1) {
+          offsetX = e.clientX - parseInt(dragElem.offsetLeft);
+          offsetY = e.clientY - parseInt(dragElem.offsetTop);
+          dragState = true;
+        }
+      });
+
+      dragElem.addEventListener("mousemove", e => {
+        if (dragState === true) {
+          divMove(e);
+        }
+      });
+
+      dragElem.addEventListener("mouseup", e => {
+        if (dragState) {
+          dragState = false;
+        }
+      });
+
+      function divMove(e) {
+        dragElem.style.top = e.clientY - offsetY + "px";
+        dragElem.style.left = e.clientX - offsetX + "px";
+      }
+
+      //Calculate the next scale
+      //Calculate the current mouse offset relative to the translated image
+      //Adjust the mouse offset for the change in scaling, e.g., const percentChange = 1 - nextScale / currentScale
+      //Add the adjusted mouse offset to the existing values for translate()
+      //Apply the transformation (scaling and the translation)
+      let currentScale = 1;
+      let translateX = 0;
+      let translateY = 0;
+      const factor = 1.2;
+
+      window.addEventListener("dblclick", e => {
+        //const delta = e.wheelDelta / 120;
+        //const nextScale = currentScale + delta * factor;
+        const nextScale = currentScale * factor;
+        zoom(nextScale, e);
+      });
+
+      const zoom = (nextScale, event) => {
+        // Track the percentage change between the old
+        // and the new scale of the image
+        const ratio = 1 - nextScale / currentScale;
+        const { clientX, clientY } = event;
+
+        // The += here is extremely important!
+        // The new 2D translation values are derived from the difference
+        // between mouse cursor position and current (!) 2D translation.
+        // So where is the mouse cursor relative to the translated image
+        // This difference is then adjusted by the % change of the scaling
+        translateX += (clientX - translateX) * ratio;
+        translateY += (clientX - translateY) * ratio;
+
+        dragElem.style.transform = `translate(${translateX}px, ${translateY}px) scale(${nextScale})`;
+
+        currentScale = nextScale;
+      };
+    </script>
+  </body>
+</html>
